@@ -1,7 +1,7 @@
 # LibreNMS Device Supervision Automation
 
-This project implements a **LibreNMS alert handler and recovery manager** that supervises devices based on their port operational status (specifically **Dialer 1**).  
-When LibreNMS raises an alert that a device/port is down, the script **automatically forces the device into an unsupervised state**. After a configurable period (20 minutes), it begins recovery attempts until the device is confirmed healthy again.
+This project implements a **LibreNMS alert handler and recovery manager** that supervises devices based on their port operational status (specifically `port2` by default).  
+When LibreNMS raises an alert that a device/port is down, the script **automatically forces the device into an unsupervised state**. After a configurable period, it begins recovery attempts until the device is confirmed healthy again.
 
 ---
 
@@ -12,20 +12,20 @@ When LibreNMS raises an alert that a device/port is down, the script **automatic
 - **Extracts** `device_id`, `hostname`, and `ip` from the alert payload.
 
 ### Port Supervision
-- **Queries LibreNMS** for the `port_id` of Dialer 1.
+- **Queries LibreNMS** for the `port_id` of a configurable port (default: `port2`).
 - Uses `ifOperStatus` of that port to determine whether the device has recovered.
 
 ### Device State Management
 - **On alert:** Overwrites device IP with a dummy unsupervised IP (`127.0.0.50`) to force it "down".
-- Runs `discover` after every overwrite to apply state quickly.
+- Runs device rediscovery after every overwrite to apply state quickly.
 - Polls the device with `artisan device:poll` via SSH inside the LibreNMS Docker container.
 - Maintains a local JSON file (`device_state.json`) to persist tracked devices across restarts.
 
 ### Recovery Loop
-- **Waits 20 minutes** after an alert, then every 20 minutes:
+- **Waits for a configurable interval** after an alert (default: 60 seconds), then every interval:
   - Restores original IP.
-  - Runs `discover` + SSH poll.
-  - Checks Dialer 1 `ifOperStatus`.
+  - Runs rediscovery and SSH poll.
+  - Checks `port2` `ifOperStatus`.
   - If **UP** → device is removed from state (no longer forced down).
   - If **DOWN** → device is forced back to unsupervised IP and retried next cycle.
 - Automatically **pauses** when no devices remain in state.
@@ -54,20 +54,25 @@ When LibreNMS raises an alert that a device/port is down, the script **automatic
 Edit the script to match your environment:
 
 ```python
-LIBRENMS_URL   = "http://192.168.150.135:8000/api/v0"
+LIBRENMS_URL   = "http://192.168.150.136/api/v0"
 API_TOKEN      = "your_librenms_api_token"
 
 UNSUPERVISED_IP = "127.0.0.50"       # dummy IP used to force device down
 STATE_FILE     = "device_state.json" # tracks supervised devices
 
-SSH_HOST = "192.168.150.135"         # host running LibreNMS Docker
-SSH_USER = "librenms"
-SSH_PASS = "librenms"                # store securely in production
+SSH_HOST = "192.168.150.136"         # host running LibreNMS Docker
+SSH_USER = "test"
+SSH_PASS = "test"                    # store securely in production
+
 DOCKER_CONTAINER = "librenms"
 SUDO_FOR_DOCKER = False              # True if your user requires sudo for docker
 
-RECOVERY_INTERVAL_SEC = 20 * 60      # 20 minutes
+RECOVERY_INTERVAL_SEC = 60           # interval between recovery attempts (seconds)
 ```
+
+**Note:**  
+- `API_TOKEN` and `SSH_PASS` should be secured in production via environment variables or vaults.
+- The polling/recovery interval is now configurable (default is 60 seconds for demo/testing, increase as needed).
 
 ---
 
@@ -88,10 +93,10 @@ RECOVERY_INTERVAL_SEC = 20 * 60      # 20 minutes
 4. **When an alert for a device is received:**
     - The device is forced into an unsupervised state.
     - Added to `device_state.json`.
-    - A recovery loop is scheduled (20 minutes later).
+    - A recovery loop is scheduled (after the configured interval).
 
 5. **When the recovery loop runs:**
-    - If Dialer 1 is **up**, the device is restored and removed from tracking.
+    - If `port2` is **up**, the device is restored and removed from tracking.
     - If still **down**, it is forced to unsupervised IP again and retried later.
 
 ---
@@ -113,15 +118,15 @@ RECOVERY_INTERVAL_SEC = 20 * 60      # 20 minutes
 2025-08-18 14:00:01 - Detected Dialer 1 port_id: 123
 
 2025-08-18 14:00:01 - Forcing device down (overwrite_ip=127.0.0.50)...
-2025-08-18 14:00:01 - 🕒 Recovery loop scheduled to start at 2025-08-18 14:20:01.
+2025-08-18 14:00:01 - 🕒 Recovery loop scheduled to start at 2025-08-18 14:01:01.
 
-2025-08-18 14:20:01 - 🔁 Starting recovery pass for all tracked devices.
-2025-08-18 14:20:01 - Dialer 1 ifOperStatus = down
-2025-08-18 14:20:01 - ❌ router1 still not healthy; forcing UNSUPERVISED_IP again.
+2025-08-18 14:01:01 - 🔁 Starting recovery pass for all tracked devices.
+2025-08-18 14:01:01 - Dialer 1 ifOperStatus = down
+2025-08-18 14:01:01 - ❌ router1 still not healthy; forcing UNSUPERVISED_IP again.
 
-2025-08-18 14:40:01 - Dialer 1 ifOperStatus = up
-2025-08-18 14:40:01 - ✅ router1 recovered (Dialer 1 is UP). Removing from state.
-2025-08-18 14:40:01 - 🎉 All devices recovered; recovery loop will pause until next alert.
+2025-08-18 14:02:01 - Dialer 1 ifOperStatus = up
+2025-08-18 14:02:01 - ✅ router1 recovered (Dialer 1 is UP). Removing from state.
+2025-08-18 14:02:01 - 🎉 All devices recovered; recovery loop will pause until next alert.
 ```
 
 ---
@@ -136,7 +141,7 @@ RECOVERY_INTERVAL_SEC = 20 * 60      # 20 minutes
 
 ## 📌 Roadmap
 
-- [ ] Configurable supervised interface name (not just "Dialer 1")
+- [ ] Configurable supervised interface name (not just "port2")
 - [ ] Exponential backoff for recovery attempts
 - [ ] Metrics export (Prometheus/Grafana) for recovery cycles
 - [ ] Web dashboard for supervised device state

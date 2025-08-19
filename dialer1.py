@@ -10,21 +10,21 @@ from datetime import datetime, timedelta
 # =======================
 # Config
 # =======================
-LIBRENMS_URL   = "http://192.168.150.135:8000/api/v0"
-API_TOKEN      = "cae7c5a4889e5b19335febc4c77d99d9"
+LIBRENMS_URL   = "http://192.168.150.136/api/v0"
+API_TOKEN      = "4e66b5ae770fa19a0a0b846e18245341"
 UNSUPERVISED_IP = "127.0.0.50"
 STATE_FILE     = "device_state.json"
 
-# SSH to the Docker host that runs LibreNMS
-SSH_HOST = "192.168.150.135"
-SSH_USER = "librenms"
-SSH_PASS = "librenms"  # secure this (env var / file) in production
+# SSH to the LibreNMS host
+SSH_HOST = "192.168.150.136"
+SSH_USER = "test"
+SSH_PASS = "test"  # secure this (env var / file) in production
 
 # If your user still needs sudo for docker, set this True
-SUDO_FOR_DOCKER = False  # True → will run "sudo -n docker exec ..."
+SUDO_FOR_DOCKER = False
 DOCKER_CONTAINER = "librenms"
 
-RECOVERY_INTERVAL_SEC = 20 * 60  # 20 minutes
+RECOVERY_INTERVAL_SEC = 60  # 20 minutes
 
 # =======================
 # Helpers
@@ -81,8 +81,7 @@ def libre_api(method, endpoint, data=None, params=None):
 
 def ssh_poll_device(host_or_id):
     cmd = f"php /opt/librenms/artisan device:poll {host_or_id}"
-    docker_prefix = f"docker exec {DOCKER_CONTAINER} " if not SUDO_FOR_DOCKER else f"sudo -n docker exec {DOCKER_CONTAINER} "
-    full_cmd = docker_prefix + cmd
+    full_cmd = cmd
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -100,27 +99,22 @@ def ssh_poll_device(host_or_id):
     finally:
         ssh.close()
 
-def find_port_id_for_dialer(device_id_or_host, target_ifname="Dialer 1"):
+def find_port_id_for_dialer(device_id_or_host, target_ifname="port2"):
     """
-    Query device ports, find the port_id where ifName == target_ifname (exact match).
-    Uses: GET /api/v0/devices/:hostname/ports
+    Query LibreNMS using the ports search API:
+    GET /api/v0/ports/search/ifName/:search
+    Returns the first matching port_id for the given device.
     """
     try:
-        resp = libre_api("GET", f"/devices/{device_id_or_host}/ports")
-        # Expected shape: {"status":"ok","ports":[{...}]}
-        ports = []
-        if resp and "ports" in resp:
-            ports = resp["ports"]
-        elif resp and "ports" not in resp and isinstance(resp, dict):
-            # some installs return "ports" as top-level list
-            ports = resp.get("devices", [])  # fallback, just in case
+        resp = libre_api("GET", f"/ports/search/ifName/{target_ifname}",
+                         params={"columns": "port_id,device_id,ifName"})
+        ports = resp.get("ports", []) if resp else []
+
         for p in ports:
-            # Normalize keys (LibreNMS API commonly uses ifName)
-            if_name = p.get("ifName") or p.get("ifDescr") or p.get("portName")
-            if if_name == target_ifname:
-                return str(p.get("port_id") or p.get("portid") or p.get("id"))
+            if str(p.get("device_id")) == str(device_id_or_host):
+                return str(p.get("port_id"))
     except Exception as e:
-        log(f"⚠️ Failed to lookup port_id for {device_id_or_host}: {e}")
+        log(f"⚠️ Failed to lookup port_id via search API for {device_id_or_host}: {e}")
     return None
 
 def get_port_oper_status(port_id):
@@ -128,12 +122,10 @@ def get_port_oper_status(port_id):
     GET /api/v0/ports/:portid → read ifOperStatus
     """
     resp = libre_api("GET", f"/ports/{port_id}")
-    # Example returns {"status":"ok","port":[{...}]}
     if not resp:
         return None
     port_list = resp.get("port") or resp.get("ports") or []
     if isinstance(port_list, dict):
-        # sometimes APIs return a single object
         port_list = [port_list]
     if not port_list:
         return None
@@ -141,10 +133,8 @@ def get_port_oper_status(port_id):
     return port.get("ifOperStatus")
 
 def force_device_down(device_id_or_host):
-    # overwrite_ip -> UNSUPERVISED_IP
     libre_api("PATCH", f"/devices/{device_id_or_host}",
               {"field": "overwrite_ip", "data": UNSUPERVISED_IP})
-    # rediscover to apply state quickly
     libre_api("GET", f"/devices/{device_id_or_host}/discover")
 
 def restore_device_ip(device_id_or_host, original_ip):
@@ -160,20 +150,18 @@ class RecoveryManager:
         self.lock = threading.Lock()
         self.cv = threading.Condition(self.lock)
         self.running = False
-        self.next_run_at = None  # datetime or None
+        self.next_run_at = None
         self.thread = threading.Thread(target=self._loop, daemon=True)
 
     def start_if_needed(self, delay_sec):
         with self.lock:
             now = datetime.now()
-            # schedule first run delay_sec from now (or keep earliest)
             if not self.running:
                 self.next_run_at = now + timedelta(seconds=delay_sec)
                 self.running = True
                 log(f"🕒 Recovery loop scheduled to start at {self.next_run_at}.")
                 self.thread.start()
             else:
-                # if already running, keep the earliest next_run_at
                 if self.next_run_at is None or self.next_run_at > now + timedelta(seconds=delay_sec):
                     self.next_run_at = now + timedelta(seconds=delay_sec)
                     log(f"🕒 Recovery loop next run adjusted to {self.next_run_at}.")
@@ -182,31 +170,24 @@ class RecoveryManager:
     def _loop(self):
         while True:
             with self.lock:
-                # If there are no devices, park the loop
                 state = load_state()
                 if not state:
                     log("🛌 State file empty — pausing recovery loop until next alert.")
                     self.running = False
                     self.next_run_at = None
-                    # wait until someone schedules again
                     self.cv.wait()
-                    # loop continues after being notified
                     continue
 
-                # ensure next_run_at exists
                 if not self.next_run_at:
                     self.next_run_at = datetime.now() + timedelta(seconds=RECOVERY_INTERVAL_SEC)
 
-                # wait until next_run_at
                 now = datetime.now()
                 wait_s = (self.next_run_at - now).total_seconds()
                 if wait_s > 0:
                     self.cv.wait(timeout=wait_s)
 
-            # Wake-up time: perform a recovery pass
             self._do_recovery_pass()
 
-            # schedule the next pass
             with self.lock:
                 self.next_run_at = datetime.now() + timedelta(seconds=RECOVERY_INTERVAL_SEC)
 
@@ -226,13 +207,9 @@ class RecoveryManager:
             log(f"\n--- Recovery Check for {hostname} (ID: {device_id}, PortID: {port_id}) ---")
 
             try:
-                # 1) restore original IP + discover
                 restore_device_ip(device_id, original_ip)
-
-                # 2) poll via SSH (helps refresh state fast)
                 ssh_poll_device(device_id)
 
-                # 3) check if Dialer 1 is UP
                 if not port_id:
                     log("ℹ️ No port_id in state; attempting to re-detect.")
                     port_id = find_port_id_for_dialer(device_id)
@@ -249,7 +226,6 @@ class RecoveryManager:
                     save_state(state)
                     changed = True
                 else:
-                    # still down (or unknown) → force device down again and keep tracking
                     log(f"❌ {hostname} still not healthy; forcing UNSUPERVISED_IP again.")
                     force_device_down(device_id)
 
@@ -258,13 +234,11 @@ class RecoveryManager:
             except Exception as e:
                 log(f"⚠️ Unexpected error during recovery for {hostname}: {e}")
 
-        # If after this pass the state is empty, the loop will pause on next iteration
         if not load_state():
             log("🎉 All devices recovered; recovery loop will pause until next alert.")
         elif changed:
             log("💾 State updated; remaining devices will be retried next cycle.")
 
-# global manager
 RECOVERY = RecoveryManager()
 
 # =======================
@@ -306,11 +280,9 @@ class AlertHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"Missing required fields")
             return
 
-        # find the Dialer 1 port_id now (best-effort)
-        port_id = find_port_id_for_dialer(device_id, "Dialer 1")
+        port_id = find_port_id_for_dialer(device_id, "port2")
         log(f"Detected Dialer 1 port_id: {port_id}")
 
-        # persist state
         state = load_state()
         state[str(device_id)] = {
             "hostname": hostname,
@@ -320,13 +292,11 @@ class AlertHandler(BaseHTTPRequestHandler):
         }
         save_state(state)
 
-        # force device down immediately
         try:
             force_device_down(device_id)
         except Exception as e:
             log(f"⚠️ Failed to force device down initially: {e}")
 
-        # kick off recovery loop if needed (first run 20 minutes from now)
         RECOVERY.start_if_needed(delay_sec=RECOVERY_INTERVAL_SEC)
 
         self.send_response(200)

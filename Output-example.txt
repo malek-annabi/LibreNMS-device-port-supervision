@@ -1,59 +1,136 @@
-Output example 
-Listening on port 5000 for LibreNMS alerts...
+test@test:~/LibreNMS-device-port-supervision$ python3 dialer1.py 
+2025-08-19 10:18:57 - HTTP server listening on 0.0.0.0:5000 for LibreNMS alerts...
+2025-08-19 10:26:01 - 
+### RAW ALERT PAYLOAD ###
+2025-08-19 10:26:01 - {
+"host":"192.168.150.132",
+"device_id":"2",
+"ip":"192.168.150.132"
+}
+2025-08-19 10:26:01 - #########################
 
---- Recovery Check for 192.168.150.132 (ID: 1) ---
-
+2025-08-19 10:26:01 - 
+### ALERT RECEIVED ###
+2025-08-19 10:26:01 - {
+  "host": "192.168.150.132",
+  "device_id": "2",
+  "ip": "192.168.150.132"
+}
+2025-08-19 10:26:01 - Device ID: 2
+2025-08-19 10:26:01 - Hostname:  192.168.150.132
+2025-08-19 10:26:01 - IP:        192.168.150.132
+2025-08-19 10:26:01 - 
 --- LibreNMS API Request ---
-METHOD: PATCH
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132
-DATA:   {
-    "field": "overwrite_ip",
-    "data": "192.168.150.132"
+2025-08-19 10:26:01 - METHOD: GET
+2025-08-19 10:26:01 - URL:    http://192.168.150.136/api/v0/ports/search/ifName/port2
+2025-08-19 10:26:01 - PARAMS: {'columns': 'port_id,device_id,ifName'}
+2025-08-19 10:26:01 - DATA:   None
+2025-08-19 10:26:01 - --- LibreNMS API Response ---
+2025-08-19 10:26:01 - STATUS: 200
+2025-08-19 10:26:01 - BODY:   {
+  "status": "ok",
+  "ports": [
+    {
+      "port_id": 9,
+      "device_id": 2,
+      "ifName": "port2"
+    }
+  ]
 }
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "message": "Device overwrite_ip field has been updated"
-}
------------------------------
+2025-08-19 10:26:01 - -----------------------------
 
-
+2025-08-19 10:26:01 - Detected Dialer 1 port_id: 9
+2025-08-19 10:26:01 - 
 --- LibreNMS API Request ---
-METHOD: GET
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132/discover
-DATA:   None
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "result": {
-        "status": 1,
-        "message": "Device will be rediscovered"
-    },
-    "count": 2
+2025-08-19 10:26:01 - METHOD: PATCH
+2025-08-19 10:26:01 - URL:    http://192.168.150.136/api/v0/devices/2
+2025-08-19 10:26:01 - DATA:   {
+  "field": "overwrite_ip",
+  "data": "127.0.0.50"
 }
------------------------------
+2025-08-19 10:26:01 - --- LibreNMS API Response ---
+2025-08-19 10:26:01 - STATUS: 200
+2025-08-19 10:26:01 - BODY:   {
+  "status": "ok",
+  "message": "Device overwrite_ip field has been updated"
+}
+2025-08-19 10:26:01 - -----------------------------
 
-Running SSH poll command: docker exec librenms php /opt/librenms/artisan device:poll 192.168.150.132
-SSH STDOUT: Starting polling run:
+2025-08-19 10:26:01 - 
+--- LibreNMS API Request ---
+2025-08-19 10:26:01 - METHOD: GET
+2025-08-19 10:26:01 - URL:    http://192.168.150.136/api/v0/devices/2/discover
+2025-08-19 10:26:01 - DATA:   None
+2025-08-19 10:26:01 - --- LibreNMS API Response ---
+2025-08-19 10:26:01 - STATUS: 200
+2025-08-19 10:26:01 - BODY:   {
+  "status": "ok",
+  "result": {
+    "status": 1,
+    "message": "Device will be rediscovered"
+  },
+  "count": 2
+}
+2025-08-19 10:26:01 - -----------------------------
 
-Hostname:  192.168.150.132 
-ID:        1
+2025-08-19 10:26:01 - 🕒 Recovery loop scheduled to start at 2025-08-19 10:27:01.712130.
+192.168.150.136 - - [19/Aug/2025 10:26:01] "POST / HTTP/1.1" 200 -
+2025-08-19 10:27:01 - 🔁 Starting recovery pass for all tracked devices.
+2025-08-19 10:27:01 - 
+--- Recovery Check for 192.168.150.132 (ID: 2, PortID: 9) ---
+2025-08-19 10:27:01 - 
+--- LibreNMS API Request ---
+2025-08-19 10:27:01 - METHOD: PATCH
+2025-08-19 10:27:01 - URL:    http://192.168.150.136/api/v0/devices/2
+2025-08-19 10:27:01 - DATA:   {
+  "field": "overwrite_ip",
+  "data": "192.168.150.132"
+}
+2025-08-19 10:27:01 - --- LibreNMS API Response ---
+2025-08-19 10:27:01 - STATUS: 200
+2025-08-19 10:27:01 - BODY:   {
+  "status": "ok",
+  "message": "Device overwrite_ip field has been updated"
+}
+2025-08-19 10:27:01 - -----------------------------
+
+2025-08-19 10:27:01 - 
+--- LibreNMS API Request ---
+2025-08-19 10:27:01 - METHOD: GET
+2025-08-19 10:27:01 - URL:    http://192.168.150.136/api/v0/devices/2/discover
+2025-08-19 10:27:01 - DATA:   None
+2025-08-19 10:27:01 - --- LibreNMS API Response ---
+2025-08-19 10:27:01 - STATUS: 200
+2025-08-19 10:27:01 - BODY:   {
+  "status": "ok",
+  "result": {
+    "status": 0,
+    "message": "Device will be rediscovered"
+  },
+  "count": 2
+}
+2025-08-19 10:27:01 - -----------------------------
+
+2025-08-19 10:27:01 - Running SSH poll command: php /opt/librenms/artisan device:poll 2
+2025-08-19 10:27:04 - SSH STDOUT:
+Starting polling run:
+
+Hostname:  192.168.150.132  
+ID:        2
 OS:        fortigate
 IP:        192.168.150.132
   
 #### Load poller module core ####
   
-Uptime: 4 hours 39 minutes 52 seconds  
+Uptime: 2 hours 29 minutes 39 seconds  
   
->> SNMP: [3/0.06s] MySQL: [4/0.03s] RRD: [2/0.00s]  
->> Runtime for poller module 'core': 0.0453 seconds with 44672 bytes  
+>> SNMP: [3/0.08s] MySQL: [4/0.03s] RRD: [2/0.00s]  
+>> Runtime for poller module 'core': 0.0376 seconds with 155752 bytes  
 #### Unload poller module core ####
   
 #### Load poller module os ####
   
-Sessions: 31  
+Sessions: 137  
 CPU: 0%  
 Location:   
 Hardware: FGT_VM64  
@@ -61,459 +138,26 @@ OS Version: v7.4.2,build2571,231219 (GA.F)
 OS Features:   
 Serial: FGVMEVKV9TRNHJDC  
   
->> SNMP: [2/0.08s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'os': 0.0911 seconds with 85592 bytes  
+>> SNMP: [2/0.05s] MySQL: [0/0.00s] RRD: [3/0.00s]  
+>> Runtime for poller module 'os': 0.0579 seconds with 200768 bytes  
 #### Unload poller module os ####
   
 #### Load poller module availability ####
   
-1 day   : 18.914%  
-1 week  : 6.623%  
-4 weeks : 68.024%  
-1 year  : 62.844%  
+1 day   : 68.987%  
+1 week  : 68.987%  
+4 weeks : 68.987%  
+1 year  : 68.987%  
   
->> SNMP: [0/0.00s] MySQL: [13/0.05s] RRD: [5/0.00s]  
->> Runtime for poller module 'availability': 0.0134 seconds with 17064 bytes  
+>> SNMP: [0/0.00s] MySQL: [13/0.07s] RRD: [5/0.00s]  
+>> Runtime for poller module 'availability': 0.0142 seconds with 66912 bytes  
 #### Unload poller module availability ####
   
 #### Load poller module ipmi ####
   
   
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ipmi': 0.0034 seconds with 1768 bytes  
-#### Unload poller module ipmi ####
-  
-#### Load poller module sensors ####
-  
-Checking (snmp) count Sessions/sec 1m avg...   
-Checking (snmp) count Sessions/sec 10m avg...   
-Checking (snmp) count Sessions/sec 30m avg...   
-Checking (snmp) count Sessions/sec 60m avg...   
-Checking (snmp) count Session count...   
-Checking (snmp) count root HTTP Sessions Blocked...   
-Checking (snmp) count root HTTPS Sessions Blocked...   
-Checking (snmp) count root HTTP URLs Blocked...   
-Checking (snmp) count root HTTPS URLs Blocked...   
-Checking (snmp) count root ActiveX Blocked...   
-Checking (snmp) count root Cookies Blocked...   
-Checking (snmp) count root Applets Blocked...   
-Checking (snmp) count IPSEC VPN tunnels...   
-Checking (snmp) count root SSL VPN Logged users...   
-Checking (snmp) count root SSL VPN Active tunnels...   
-Checking (snmp) count Link Latency Default_Google Search\port1...   
-Checking (snmp) count Link Jitter Default_Google Search\port1...   
-Checking (snmp) count Link Packet Loss Default_Google Search\port1...   
-Checking (snmp) count root IPS Intrusions Detected...   
-Checking (snmp) count root IPS Intrusions Blocked...   
-Checking (snmp) count root IPS Severity Critical Detected...   
-Checking (snmp) count root IPS Severity High Detected...   
-Checking (snmp) count root IPS Severity Medium Detected...   
-Checking (snmp) count root IPS Severity Low Detected...   
-Checking (snmp) count root IPS Severity Informational Detected...   
-Checking (snmp) count root IPS Signature Detected...   
-Checking (snmp) count root IPS Anomaly Detected...   
-0 #  
-2 #  
-2 #  
-2 #  
-31 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-54.042 #  
-1.39 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-0 #  
-Checking (snmp) percent root Server ID 1 Pool Usage...   
-Checking (snmp) percent root Server ID 2 Pool Usage...   
-0 %  
-0 %  
-Checking (snmp) state SSL-VPN Status...   
-Checking (snmp) state Default_Google Search\port1...   
-Checking (snmp) state root vDom HA state...   
-1 #  
-0 #  
-3 #  
-  
->> SNMP: [5/0.13s] MySQL: [2/0.02s] RRD: [33/0.01s]  
->> Runtime for poller module 'sensors': 0.1506 seconds with 34136 bytes  
-#### Unload poller module sensors ####
-  
-#### Load poller module processors ####
-  
-System Cpu Usage: 0%
-CPU Core 1: 13%
-  
->> SNMP: [1/0.03s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'processors': 0.0295 seconds with 2920 bytes  
-#### Unload poller module processors ####
-  
-#### Load poller module mempools ####
-  
-Main Memory (system): 35%  698.03 MiB / 1.95 GiB  
-  
->> SNMP: [1/0.02s] MySQL: [1/0.01s] RRD: [2/0.00s]  
->> Runtime for poller module 'mempools': 0.0277 seconds with 8664 bytes  
-#### Unload poller module mempools ####
-  
-#### Load poller module storage ####
-  
-  
 >> SNMP: [0/0.00s] MySQL: [1/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'storage': 0.0019 seconds with 67464 bytes  
-#### Unload poller module storage ####
-  
-#### Load poller module netstats ####
-  
-icmp   
-ip   
-ip_forward   
-snmp   
-udp   
-tcp   
-  
->> SNMP: [11/0.21s] MySQL: [0/0.00s] RRD: [5/0.00s]  
->> Runtime for poller module 'netstats': 0.2139 seconds with 5672 bytes  
-#### Unload poller module netstats ####
-  
-#### Load poller module hr-mib ####
-  
-
-  
->> SNMP: [1/0.02s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'hr-mib': 0.0170 seconds with 1376 bytes  
-#### Unload poller module hr-mib ####
-  
-#### Load poller module ucd-mib ####
-  
-  
->> SNMP: [2/0.03s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ucd-mib': 0.0321 seconds with 1904 bytes  
-#### Unload poller module ucd-mib ####
-  
-#### Load poller module ipSystemStats ####
-  
-ipv4 ipv6 
-  
->> SNMP: [1/0.04s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'ipSystemStats': 0.0470 seconds with 2120 bytes  
-#### Unload poller module ipSystemStats ####
-  
-#### Load poller module ports ####
-  
-Fetched data (Full ports polling): ifDescr ifAdminStatus ifOperStatus ifLastChange ifType ifPhysAddress ifMtu ifInErrors ifOutErrors ifInDiscards ifOutDiscards dot3StatsDuplexStatus   
-port1Port port1: port1 (1 / #1) dot3Duplex   VLAN = ? bps(50.1 kbps/100.7 kbps) bytes(18.37 KiB/36.88 KiB) pkts(50.3 pps/49.67 pps)   
-port2Port port2: port2 (2 / #2) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-port3Port port3: port3 (3 / #3) dot3Duplex   VLAN = ? bps(1.78 kbps/0 bps) bytes(668 B/0 B) pkts(2.33 pps/0 pps)   
-naf.rootPort naf.root: naf.root (11 / #4) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-l2t.rootPort l2t.root: l2t.root (12 / #5) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-SSL VPN interfacePort ssl.root: ssl.root (13 / #6) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-Port fortilink: fortilink (14 / #7) disabled.  
-  
->> SNMP: [14/0.48s] MySQL: [13/0.09s] RRD: [7/0.00s]  
->> Runtime for poller module 'ports': 0.5183 seconds with 89840 bytes  
-#### Unload poller module ports ####
-  
-#### Load poller module customoid ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'customoid': 0.0019 seconds with 1328 bytes  
-#### Unload poller module customoid ####
-  
-#### Load poller module bgp-peers ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'bgp-peers': 0.0046 seconds with 1288 bytes  
-#### Unload poller module bgp-peers ####
-  
-#### Load poller module ucd-diskio ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ucd-diskio': 0.0018 seconds with 1344 bytes  
-#### Unload poller module ucd-diskio ####
-  
-#### Load poller module wireless ####
-  
-ap-count:   
-  Connected APs: 0   
-clients:   
-  Clients: Total: 0   
-  
->> SNMP: [1/0.02s] MySQL: [1/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'wireless': 0.0250 seconds with 9152 bytes  
-#### Unload poller module wireless ####
-  
-#### Load poller module ospf ####
-  
-Processes:   
-.Total processes: 1  
-Areas:   
-Total areas: 0  
-Ports:   
-Total Ports: 0  
-Neighbours:   
-Total neighbors: 0  
-TOS Metrics:   
-Total TOS metrics: 0  
-  
->> SNMP: [5/0.11s] MySQL: [6/0.04s] RRD: [2/0.00s]  
->> Runtime for poller module 'ospf': 0.1239 seconds with 114240 bytes  
-#### Unload poller module ospf ####
-  
-#### Load poller module ospfv3 ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'ospfv3': 0.0040 seconds with 4088 bytes  
-#### Unload poller module ospfv3 ####
-  
-#### Load poller module entity-physical ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'entity-physical': 0.0016 seconds with 1208 bytes  
-#### Unload poller module entity-physical ####
-  
-#### Load poller module applications ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [1/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'applications': 0.0030 seconds with 6696 bytes  
-#### Unload poller module applications ####
-  
-#### Load poller module stp ####
-  
-Instances:   
-Ports:   
-  
->> SNMP: [0/0.00s] MySQL: [2/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'stp': 0.0037 seconds with 8352 bytes  
-#### Unload poller module stp ####
-  
-#### Load poller module ntp ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ntp': 0.0013 seconds with 1320 bytes  
-#### Unload poller module ntp ####
-  
-Enabled graphs (17): uptime poller_modules_perf fortigate_sessions fortigate_cpu availability netstat_icmp netstat_icmp_info netstat_ip netstat_ip_frag netstat_udp netstat_tcp ipsystemstats_ipv4 ipsystemstats_ipv4_frag ipsystemstats_ipv6 ipsystemstats_ipv6_frag poller_perf ping_perf
-
-  
-
->>> Polled 192.168.150.132 (1) in 2.436 seconds <<<  
-### Start Device Groups ###  
-### End Device Groups (0.0062s) ### 
-  
-#### Start Alerts ####  
-Rule #1 (Device Down! Due to no ICMP response.):   
-Status: NOCHG  
-Rule #2 (Device Down (SNMP unreachable)):   
-Status: NOCHG  
-Rule #3 (Device rebooted):   
-Status: NOCHG  
-Rule #4 (Port status up/down):   
-Status: NOCHG  
-Rule #5 (Ping Latency):   
-Status: NOCHG  
-Rule #6 (Port utilisation over threshold):   
-Status: NOCHG  
-Rule #7 (Sensor over limit - Check Device Health Settings):   
-Status: NOCHG  
-Rule #8 (Sensor under limit - Check Device Health Settings):   
-Status: NOCHG  
-Rule #9 (Service up/down):   
-Status: NOCHG  
-Rule #10 (Wireless Sensor over limit):   
-Status: NOCHG  
-Rule #11 (Wireless Sensor under limit):   
-Status: NOCHG  
-Rule #12 (State Sensor Critical):   
-Status: NOCHG  
-Rule #13 (Device changed status):   
-Status: NOCHG  
-Rule #26 (DIALER1):   
-Status: NOCHG  
-#### End Alerts (0.0359s) ####
-  
-
-SNMP [47/1.23s]: Snmpget[26/0.57s] Snmpwalk[21/0.66s]  
-SQL [56/0.33s]: Select[27/0.12s] Update[24/0.18s] Delete[5/0.03s]  
-RRD [82/0.01s]: Update[82/0.01s]  
-
-SSH STDERR: 
-
---- LibreNMS API Request ---
-METHOD: GET
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132
-DATA:   None
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "devices": [
-        {
-            "device_id": 1,
-            "inserted": "2025-06-29T23:16:39.000000Z",
-            "hostname": "192.168.150.132",
-            "sysName": "fgvmevkv9trnhjdc",
-            "display": null,
-            "ip": "192.168.150.132",
-            "overwrite_ip": "192.168.150.132",
-            "community": "Test",
-            "authlevel": null,
-            "authname": null,
-            "authpass": null,
-            "authalgo": null,
-            "cryptopass": null,
-            "cryptoalgo": null,
-            "snmpver": "v2c",
-            "port": 161,
-            "transport": "udp",
-            "timeout": null,
-            "retries": null,
-            "snmp_disable": 0,
-            "bgpLocalAs": null,
-            "sysObjectID": ".1.3.6.1.4.1.12356.101.1.80001",
-            "sysDescr": "Test",
-            "sysContact": "Test",
-            "version": "v7.4.2,build2571,231219 (GA.F)",
-            "hardware": "FGT_VM64",
-            "features": null,
-            "location_id": null,
-            "os": "fortigate",
-            "status": true,
-            "status_reason": "",
-            "ignore": 0,
-            "disabled": 0,
-            "uptime": 16792,
-            "agent_uptime": 0,
-            "last_polled": "2025-08-11T12:34:18.000000Z",
-            "last_poll_attempted": null,
-            "last_polled_timetaken": 2.4356789588928,
-            "last_discovered_timetaken": 3.507,
-            "last_discovered": null,
-            "last_ping": "2025-08-11T12:34:16.000000Z",
-            "last_ping_timetaken": 0.916,
-            "purpose": null,
-            "type": "firewall",
-            "serial": "FGVMEVKV9TRNHJDC",
-            "icon": "images/os/fortinet.svg",
-            "poller_group": 0,
-            "override_sysLocation": 0,
-            "notes": null,
-            "port_association_mode": 1,
-            "max_depth": 0,
-            "disable_notify": 0,
-            "ignore_status": 0,
-            "location": null,
-            "lat": null,
-            "lng": null
-        }
-    ],
-    "count": 1
-}
------------------------------
-
-
---- Recovery Check for 192.168.150.132 (ID: 1) ---
-
---- LibreNMS API Request ---
-METHOD: PATCH
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132
-DATA:   {
-    "field": "overwrite_ip",
-    "data": "192.168.150.132"
-}
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "message": "Device overwrite_ip field has been updated"
-}
------------------------------
-
-
---- LibreNMS API Request ---
-METHOD: GET
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132/discover
-DATA:   None
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "result": {
-        "status": 1,
-        "message": "Device will be rediscovered"
-    },
-    "count": 2
-}
------------------------------
-
-Running SSH poll command: docker exec librenms php /opt/librenms/artisan device:poll 192.168.150.132
-SSH STDOUT: Starting polling run:
-
-Hostname:  192.168.150.132 
-ID:        1
-OS:        fortigate
-IP:        192.168.150.132
-  
-#### Load poller module core ####
-  
-Uptime: 4 hours 44 minutes 56 seconds  
-  
->> SNMP: [3/0.06s] MySQL: [4/0.03s] RRD: [2/0.00s]  
->> Runtime for poller module 'core': 0.0475 seconds with 44672 bytes  
-#### Unload poller module core ####
-  
-#### Load poller module os ####
-  
-Sessions: 8  
-CPU: 0%  
-Location:   
-Hardware: FGT_VM64  
-OS Version: v7.4.2,build2571,231219 (GA.F)  
-OS Features:   
-Serial: FGVMEVKV9TRNHJDC  
-  
->> SNMP: [2/0.09s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'os': 0.0911 seconds with 85272 bytes  
-#### Unload poller module os ####
-  
-#### Load poller module availability ####
-  
-1 day   : 19.265%  
-1 week  : 6.623%  
-4 weeks : 68.024%  
-1 year  : 62.847%  
-  
->> SNMP: [0/0.00s] MySQL: [13/0.05s] RRD: [5/0.00s]  
->> Runtime for poller module 'availability': 0.0136 seconds with 17064 bytes  
-#### Unload poller module availability ####
-  
-#### Load poller module ipmi ####
-  
-  
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ipmi': 0.0033 seconds with 1768 bytes  
+>> Runtime for poller module 'ipmi': 0.0021 seconds with 104672 bytes  
 #### Unload poller module ipmi ####
   
 #### Load poller module sensors ####
@@ -547,9 +191,9 @@ Checking (snmp) count root IPS Signature Detected...
 Checking (snmp) count root IPS Anomaly Detected...   
 0 #  
 0 #  
-1 #  
-2 #  
-8 #  
+0 #  
+0 #  
+137 #  
 0 #  
 0 #  
 0 #  
@@ -560,8 +204,8 @@ Checking (snmp) count root IPS Anomaly Detected...
 0 #  
 0 #  
 0 #  
-53.706 #  
-1.201 #  
+54.626 #  
+2.986 #  
 0 #  
 0 #  
 0 #  
@@ -583,32 +227,32 @@ Checking (snmp) state root vDom HA state...
 0 #  
 3 #  
   
->> SNMP: [5/0.13s] MySQL: [6/0.05s] RRD: [33/0.01s]  
->> Runtime for poller module 'sensors': 0.1630 seconds with 36264 bytes  
+>> SNMP: [5/0.06s] MySQL: [7/0.05s] RRD: [33/0.00s]  
+>> Runtime for poller module 'sensors': 0.0797 seconds with 65152 bytes  
 #### Unload poller module sensors ####
   
 #### Load poller module processors ####
   
-System Cpu Usage: 0%
-CPU Core 1: 1%
+System Cpu Usage: 0%  
+CPU Core 1: 2%  
   
->> SNMP: [1/0.03s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'processors': 0.0316 seconds with 2920 bytes  
+>> SNMP: [1/0.01s] MySQL: [3/0.03s] RRD: [3/0.00s]  
+>> Runtime for poller module 'processors': 0.0159 seconds with 63024 bytes  
 #### Unload poller module processors ####
   
 #### Load poller module mempools ####
   
 Main Memory (system): 35%  698.03 MiB / 1.95 GiB  
   
->> SNMP: [1/0.03s] MySQL: [1/0.01s] RRD: [2/0.00s]  
->> Runtime for poller module 'mempools': 0.0315 seconds with 8664 bytes  
+>> SNMP: [1/0.01s] MySQL: [1/0.01s] RRD: [2/0.00s]  
+>> Runtime for poller module 'mempools': 0.0133 seconds with 33808 bytes  
 #### Unload poller module mempools ####
   
 #### Load poller module storage ####
   
   
 >> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'storage': 0.0023 seconds with 67464 bytes  
+>> Runtime for poller module 'storage': 0.0016 seconds with 18912 bytes  
 #### Unload poller module storage ####
   
 #### Load poller module netstats ####
@@ -620,67 +264,67 @@ snmp
 udp   
 tcp   
   
->> SNMP: [11/0.22s] MySQL: [0/0.00s] RRD: [5/0.00s]  
->> Runtime for poller module 'netstats': 0.2207 seconds with 5672 bytes  
+>> SNMP: [11/0.16s] MySQL: [0/0.00s] RRD: [5/0.00s]  
+>> Runtime for poller module 'netstats': 0.1663 seconds with 26488 bytes  
 #### Unload poller module netstats ####
   
 #### Load poller module hr-mib ####
   
 
   
->> SNMP: [1/0.02s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'hr-mib': 0.0180 seconds with 1376 bytes  
+>> SNMP: [1/0.01s] MySQL: [0/0.00s] RRD: [1/0.00s]  
+>> Runtime for poller module 'hr-mib': 0.0131 seconds with 1768 bytes  
 #### Unload poller module hr-mib ####
   
 #### Load poller module ucd-mib ####
   
   
 >> SNMP: [2/0.03s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ucd-mib': 0.0339 seconds with 1904 bytes  
+>> Runtime for poller module 'ucd-mib': 0.0265 seconds with 2904 bytes  
 #### Unload poller module ucd-mib ####
   
 #### Load poller module ipSystemStats ####
   
 ipv4 ipv6 
   
->> SNMP: [1/0.04s] MySQL: [0/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'ipSystemStats': 0.0474 seconds with 2120 bytes  
+>> SNMP: [1/0.02s] MySQL: [0/0.00s] RRD: [3/0.00s]  
+>> Runtime for poller module 'ipSystemStats': 0.0224 seconds with 2904 bytes  
 #### Unload poller module ipSystemStats ####
   
 #### Load poller module ports ####
   
 Fetched data (Full ports polling): ifDescr ifAdminStatus ifOperStatus ifLastChange ifType ifPhysAddress ifMtu ifInErrors ifOutErrors ifInDiscards ifOutDiscards dot3StatsDuplexStatus   
-port1Port port1: port1 (1 / #1) dot3Duplex   VLAN = ? bps(4.01 kbps/5.35 kbps) bytes(102.74 KiB/137.07 KiB) pkts(3.97 pps/3.65 pps)   
-port2Port port2: port2 (2 / #2) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-port3Port port3: port3 (3 / #3) dot3Duplex   VLAN = ? bps(872 bps/0 bps) bytes(22.36 KiB/0 B) pkts(1.62 pps/0 pps)   
-naf.rootPort naf.root: naf.root (11 / #4) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-l2t.rootPort l2t.root: l2t.root (12 / #5) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-SSL VPN interfacePort ssl.root: ssl.root (13 / #6) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
-Port fortilink: fortilink (14 / #7) disabled.  
+Port port1: port1 (1 / #8) dot3Duplex   VLAN = ? bps(2.05 kbps/2.95 kbps) bytes(29.46 KiB/42.53 KiB) pkts(2.72 pps/2.59 pps)   
+Port port2: port2 (2 / #9) dot3Duplex   VLAN = ? ifOperStatus ifSpeed bps(0 bps/27 bps) bytes(0 B/404 B) pkts(0 pps/25.42 mpps)   
+Port port3: port3 (3 / #10) dot3Duplex   VLAN = ? bps(599 bps/0 bps) bytes(8.63 KiB/0 B) pkts(1.05 pps/0 pps)   
+Port naf.root: naf.root (11 / #11) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
+Port l2t.root: l2t.root (12 / #12) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
+Port ssl.root: ssl.root (13 / #13) dot3Duplex   VLAN = ? bps(0 bps/0 bps) bytes(0 B/0 B) pkts(0 pps/0 pps)   
+Port fortilink: fortilink (14 / #14) dot3Duplex   VLAN = ?   
   
->> SNMP: [14/0.24s] MySQL: [13/0.10s] RRD: [7/0.00s]  
->> Runtime for poller module 'ports': 0.2771 seconds with 90400 bytes  
+>> SNMP: [14/0.21s] MySQL: [17/0.15s] RRD: [7/0.00s]  
+>> Runtime for poller module 'ports': 0.2505 seconds with 582128 bytes  
 #### Unload poller module ports ####
   
 #### Load poller module customoid ####
   
   
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'customoid': 0.0019 seconds with 1328 bytes  
+>> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
+>> Runtime for poller module 'customoid': 0.0014 seconds with 2856 bytes  
 #### Unload poller module customoid ####
   
 #### Load poller module bgp-peers ####
   
   
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'bgp-peers': 0.0038 seconds with 1288 bytes  
+>> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
+>> Runtime for poller module 'bgp-peers': 0.0026 seconds with 14104 bytes  
 #### Unload poller module bgp-peers ####
   
 #### Load poller module ucd-diskio ####
   
   
->> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ucd-diskio': 0.0018 seconds with 1344 bytes  
+>> SNMP: [1/0.02s] MySQL: [1/0.01s] RRD: [1/0.00s]  
+>> Runtime for poller module 'ucd-diskio': 0.0205 seconds with 65104 bytes  
 #### Unload poller module ucd-diskio ####
   
 #### Load poller module wireless ####
@@ -690,178 +334,254 @@ ap-count:
 clients:   
   Clients: Total: 0   
   
->> SNMP: [1/0.02s] MySQL: [1/0.00s] RRD: [3/0.00s]  
->> Runtime for poller module 'wireless': 0.0252 seconds with 9152 bytes  
+>> SNMP: [1/0.01s] MySQL: [1/0.01s] RRD: [3/0.00s]  
+>> Runtime for poller module 'wireless': 0.0183 seconds with 85408 bytes  
 #### Unload poller module wireless ####
   
 #### Load poller module ospf ####
   
-Processes:   
-.Total processes: 1  
-Areas:   
+Processes: .
+Total processes: 1  
+Areas: 
 Total areas: 0  
-Ports:   
+Ports: 
 Total Ports: 0  
-Neighbours:   
+Neighbours: 
 Total neighbors: 0  
 TOS Metrics:   
 Total TOS metrics: 0  
   
->> SNMP: [5/0.30s] MySQL: [6/0.03s] RRD: [2/0.00s]  
->> Runtime for poller module 'ospf': 0.3143 seconds with 114240 bytes  
+>> SNMP: [5/0.09s] MySQL: [6/0.03s] RRD: [2/0.00s]  
+>> Runtime for poller module 'ospf': 0.0954 seconds with 326472 bytes  
 #### Unload poller module ospf ####
   
 #### Load poller module ospfv3 ####
   
   
 >> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'ospfv3': 0.0043 seconds with 4088 bytes  
+>> Runtime for poller module 'ospfv3': 0.0028 seconds with 121048 bytes  
 #### Unload poller module ospfv3 ####
   
 #### Load poller module entity-physical ####
   
   
 >> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'entity-physical': 0.0014 seconds with 1208 bytes  
+>> Runtime for poller module 'entity-physical': 0.0005 seconds with 7688 bytes  
 #### Unload poller module entity-physical ####
   
 #### Load poller module applications ####
   
   
 >> SNMP: [0/0.00s] MySQL: [1/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'applications': 0.0032 seconds with 7336 bytes  
+>> Runtime for poller module 'applications': 0.0025 seconds with 75808 bytes  
 #### Unload poller module applications ####
   
 #### Load poller module stp ####
   
-Instances:   
-Ports:   
+Instances: 
+Ports: 
   
 >> SNMP: [0/0.00s] MySQL: [2/0.01s] RRD: [1/0.00s]  
->> Runtime for poller module 'stp': 0.0038 seconds with 8352 bytes  
+>> Runtime for poller module 'stp': 0.0032 seconds with 51120 bytes  
 #### Unload poller module stp ####
   
 #### Load poller module ntp ####
   
   
 >> SNMP: [0/0.00s] MySQL: [0/0.00s] RRD: [1/0.00s]  
->> Runtime for poller module 'ntp': 0.0007 seconds with 1320 bytes  
+>> Runtime for poller module 'ntp': 0.0005 seconds with 2824 bytes  
 #### Unload poller module ntp ####
   
 Enabled graphs (17): uptime poller_modules_perf fortigate_sessions fortigate_cpu availability netstat_icmp netstat_icmp_info netstat_ip netstat_ip_frag netstat_udp netstat_tcp ipsystemstats_ipv4 ipsystemstats_ipv4_frag ipsystemstats_ipv6 ipsystemstats_ipv6_frag poller_perf ping_perf
 
   
 
->>> Polled 192.168.150.132 (1) in 2.418 seconds <<<  
-### Start Device Groups ###  
-### End Device Groups (0.0072s) ### 
-  
-#### Start Alerts ####  
-Rule #1 (Device Down! Due to no ICMP response.):   
-Status: NOCHG  
-Rule #2 (Device Down (SNMP unreachable)):   
-Status: NOCHG  
-Rule #3 (Device rebooted):   
-Status: NOCHG  
-Rule #4 (Port status up/down):   
-Status: NOCHG  
-Rule #5 (Ping Latency):   
-Status: NOCHG  
-Rule #6 (Port utilisation over threshold):   
-Status: NOCHG  
-Rule #7 (Sensor over limit - Check Device Health Settings):   
-Status: NOCHG  
-Rule #8 (Sensor under limit - Check Device Health Settings):   
-Status: NOCHG  
-Rule #9 (Service up/down):   
-Status: NOCHG  
-Rule #10 (Wireless Sensor over limit):   
-Status: NOCHG  
-Rule #11 (Wireless Sensor under limit):   
-Status: NOCHG  
-Rule #12 (State Sensor Critical):   
-Status: NOCHG  
-Rule #13 (Device changed status):   
-Status: NOCHG  
-Rule #26 (DIALER1):   
-Status: NOCHG  
-#### End Alerts (0.0441s) ####
-  
+>>> Polled 192.168.150.132 (2) in 1.936 seconds <<<  
 
-SNMP [47/1.20s]: Snmpget[26/0.60s] Snmpwalk[21/0.61s]  
-SQL [60/0.41s]: Select[27/0.16s] Update[28/0.24s] Delete[5/0.02s]  
-RRD [82/0.01s]: Update[82/0.01s]  
+In StreamHandler.php line 156:
+                                                                               
+  The stream or file "/opt/librenms/logs/librenms.log" could not be opened in  
+   append mode: Failed to open stream: Permission denied                       
+  The exception occurred while attempting to log: %RException: UnexpectedValu  
+  eException The stream or file "/opt/librenms/logs/librenms.log" could not b  
+  e opened in append mode: Failed to open stream: Permission denied            
+  The exception occurred while attempting to log: INFO: device:poll 192.168.1  
+  50.132 (2) polled in 1.936s%n @ %G/opt/librenms/vendor/monolog/monolog/src/  
+  Monolog/Handler/StreamHandler.php:156%n                                      
+  #0 /opt/librenms/vendor/monolog/monolog/src/Monolog/Handler/AbstractProcess  
+  ingHandler.php(44): Monolog\Handler\StreamHandler->write()                   
+  #1 /opt/librenms/vendor/monolog/monolog/src/Monolog/Logger.php(391): Monolo  
+  g\Handler\AbstractProcessingHandler->handle()                                
+  #2 /opt/librenms/vendor/monolog/monolog/src/Monolog/Logger.php(672): Monolo  
+  g\Logger->addRecord()                                                        
+  #3 /opt/librenms/vendor/laravel/framework/src/Illuminate/Log/Logger.php(183  
+  ): Monolog\Logger->alert()                                                   
+  #4 /opt/librenms/vendor/laravel/framework/src/Illuminate/Log/Logger.php(72)  
+  : Illuminate\Log\Logger->writeLog()                                          
+  #5 /opt/librenms/app/Jobs/PollDevice.php(93): Illuminate\Log\Logger->alert(  
+  )                                                                            
+  #6 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMet  
+  hod.php(36): App\Jobs\PollDevice->handle()                                   
+  #7 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/Util.php  
+  (43): Illuminate\Container\BoundMethod::Illuminate\Container\{closure}()     
+  #8 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMet  
+  hod.php(96): Illuminate\Container\Util::unwrapIfClosure()                    
+  #9 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMet  
+  hod.php(35): Illuminate\Container\BoundMethod::callBoundMethod()             
+  #10 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/Contain  
+  er.php(754): Illuminate\Container\BoundMethod::call()                        
+  #11 /opt/librenms/vendor/laravel/framework/src/Illuminate/Bus/Dispatcher.ph  
+  p(132): Illuminate\Container\Container->call()                               
+  #12 /opt/librenms/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline  
+  .php(169): Illuminate\Bus\Dispatcher->Illuminate\Bus\{closure}()             
+  #13 /opt/librenms/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline  
+  .php(126): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}()     
+  #14 /opt/librenms/vendor/laravel/framework/src/Illuminate/Bus/Dispatcher.ph  
+  p(136): Illuminate\Pipeline\Pipeline->then()                                 
+  #15 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/CallQueuedH  
+  andler.php(125): Illuminate\Bus\Dispatcher->dispatchNow()                    
+  #16 /opt/librenms/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline  
+  .php(169): Illuminate\Queue\CallQueuedHandler->Illuminate\Queue\{closure}()  
+  #17 /opt/librenms/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline  
+  .php(126): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}()     
+  #18 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/CallQueuedH  
+  andler.php(120): Illuminate\Pipeline\Pipeline->then()                        
+  #19 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/CallQueuedH  
+  andler.php(68): Illuminate\Queue\CallQueuedHandler->dispatchThroughMiddlewa  
+  re()                                                                         
+  #20 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/Jobs/Job.ph  
+  p(102): Illuminate\Queue\CallQueuedHandler->call()                           
+  #21 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/SyncQueue.p  
+  hp(130): Illuminate\Queue\Jobs\Job->fire()                                   
+  #22 /opt/librenms/vendor/laravel/framework/src/Illuminate/Queue/SyncQueue.p  
+  hp(110): Illuminate\Queue\SyncQueue->executeJob()                            
+  #23 /opt/librenms/vendor/laravel/framework/src/Illuminate/Bus/Dispatcher.ph  
+  p(250): Illuminate\Queue\SyncQueue->push()                                   
+  #24 /opt/librenms/vendor/laravel/framework/src/Illuminate/Bus/Dispatcher.ph  
+  p(234): Illuminate\Bus\Dispatcher->pushCommandToQueue()                      
+  #25 /opt/librenms/vendor/laravel/framework/src/Illuminate/Bus/Dispatcher.ph  
+  p(101): Illuminate\Bus\Dispatcher->dispatchToQueue()                         
+  #26 /opt/librenms/vendor/laravel/framework/src/Illuminate/Foundation/Bus/Di  
+  spatchable.php(76): Illuminate\Bus\Dispatcher->dispatchSync()                
+  #27 /opt/librenms/app/Console/Commands/DevicePoll.php(79): App\Jobs\PollDev  
+  ice::dispatchSync()                                                          
+  #28 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMe  
+  thod.php(36): App\Console\Commands\DevicePoll->handle()                      
+  #29 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/Util.ph  
+  p(43): Illuminate\Container\BoundMethod::Illuminate\Container\{closure}()    
+  #30 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMe  
+  thod.php(96): Illuminate\Container\Util::unwrapIfClosure()                   
+  #31 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/BoundMe  
+  thod.php(35): Illuminate\Container\BoundMethod::callBoundMethod()            
+  #32 /opt/librenms/vendor/laravel/framework/src/Illuminate/Container/Contain  
+  er.php(754): Illuminate\Container\BoundMethod::call()                        
+  #33 /opt/librenms/vendor/laravel/framework/src/Illuminate/Console/Command.p  
+  hp(209): Illuminate\Container\Container->call()                              
+  #34 /opt/librenms/vendor/symfony/console/Command/Command.php(318): Illumina  
+  te\Console\Command->execute()                                                
+  #35 /opt/librenms/vendor/laravel/framework/src/Illuminate/Console/Command.p  
+  hp(178): Symfony\Component\Console\Command\Command->run()                    
+  #36 /opt/librenms/vendor/symfony/console/Application.php(1092): Illuminate\  
+  Console\Command->run()                                                       
+  #37 /opt/librenms/vendor/symfony/console/Application.php(341): Symfony\Comp  
+  onent\Console\Application->doRunCommand()                                    
+  #38 /opt/librenms/vendor/symfony/console/Application.php(192): Symfony\Comp  
+  onent\Console\Application->doRun()                                           
+  #39 /opt/librenms/vendor/laravel/framework/src/Illuminate/Foundation/Consol  
+  e/Kernel.php(197): Symfony\Component\Console\Application->run()              
+  #40 /opt/librenms/vendor/laravel/framework/src/Illuminate/Foundation/Applic  
+  ation.php(1234): Illuminate\Foundation\Console\Kernel->handle()              
+  #41 /opt/librenms/artisan(16): Illuminate\Foundation\Application->handleCom  
+  mand()                                                                       
+  #42 {main}                                                                   
+  Context: {"color":true}                                                      
+                                                                               
 
-SSH STDERR: 
 
+2025-08-19 10:27:04 - 
 --- LibreNMS API Request ---
-METHOD: GET
-URL:    http://192.168.150.135:8000/api/v0/devices/192.168.150.132
-DATA:   None
---- LibreNMS API Response ---
-STATUS: 200
-BODY:   {
-    "status": "ok",
-    "devices": [
-        {
-            "device_id": 1,
-            "inserted": "2025-06-29T23:16:39.000000Z",
-            "hostname": "192.168.150.132",
-            "sysName": "fgvmevkv9trnhjdc",
-            "display": null,
-            "ip": "192.168.150.132",
-            "overwrite_ip": "192.168.150.132",
-            "community": "Test",
-            "authlevel": null,
-            "authname": null,
-            "authpass": null,
-            "authalgo": null,
-            "cryptopass": null,
-            "cryptoalgo": null,
-            "snmpver": "v2c",
-            "port": 161,
-            "transport": "udp",
-            "timeout": null,
-            "retries": null,
-            "snmp_disable": 0,
-            "bgpLocalAs": null,
-            "sysObjectID": ".1.3.6.1.4.1.12356.101.1.80001",
-            "sysDescr": "Test",
-            "sysContact": "Test",
-            "version": "v7.4.2,build2571,231219 (GA.F)",
-            "hardware": "FGT_VM64",
-            "features": null,
-            "location_id": null,
-            "os": "fortigate",
-            "status": true,
-            "status_reason": "",
-            "ignore": 0,
-            "disabled": 0,
-            "uptime": 17096,
-            "agent_uptime": 0,
-            "last_polled": "2025-08-11T12:39:22.000000Z",
-            "last_poll_attempted": null,
-            "last_polled_timetaken": 2.4180908203125,
-            "last_discovered_timetaken": 3.712,
-            "last_discovered": null,
-            "last_ping": "2025-08-11T12:39:20.000000Z",
-            "last_ping_timetaken": 1.01,
-            "purpose": "",
-            "type": "firewall",
-            "serial": "FGVMEVKV9TRNHJDC",
-            "icon": "images/os/fortinet.svg",
-            "poller_group": 0,
-            "override_sysLocation": 0,
-            "notes": null,
-            "port_association_mode": 1,
-            "max_depth": 0,
-            "disable_notify": 0,
-            "ignore_status": 0,
-            "location": null,
-            "lat": null,
-            "lng": null
-        }
-    ],
-    "count": 1
+2025-08-19 10:27:04 - METHOD: GET
+2025-08-19 10:27:04 - URL:    http://192.168.150.136/api/v0/ports/9
+2025-08-19 10:27:04 - DATA:   None
+2025-08-19 10:27:04 - --- LibreNMS API Response ---
+2025-08-19 10:27:04 - STATUS: 200
+2025-08-19 10:27:04 - BODY:   {
+  "status": "ok",
+  "port": [
+    {
+      "port_id": 9,
+      "device_id": 2,
+      "port_descr_type": null,
+      "port_descr_descr": null,
+      "port_descr_circuit": null,
+      "port_descr_speed": null,
+      "port_descr_notes": null,
+      "ifDescr": "port2",
+      "ifName": "port2",
+      "portName": null,
+      "ifIndex": 2,
+      "ifSpeed": 10000000000,
+      "ifSpeed_prev": 0,
+      "ifConnectorPresent": "true",
+      "ifOperStatus": "up",
+      "ifOperStatus_prev": "down",
+      "ifAdminStatus": "up",
+      "ifAdminStatus_prev": "up",
+      "ifDuplex": "0",
+      "ifMtu": 1500,
+      "ifType": "ethernetCsmacd",
+      "ifAlias": "port2",
+      "ifPhysAddress": "000c29f2fbc3",
+      "ifLastChange": 894851,
+      "ifVlan": null,
+      "ifTrunk": null,
+      "ifVrf": 0,
+      "ignore": 0,
+      "disabled": 0,
+      "deleted": 0,
+      "pagpOperationMode": null,
+      "pagpPortState": null,
+      "pagpPartnerDeviceId": null,
+      "pagpPartnerLearnMethod": null,
+      "pagpPartnerIfIndex": null,
+      "pagpPartnerGroupIfIndex": null,
+      "pagpPartnerDeviceName": null,
+      "pagpEthcOperationMode": null,
+      "pagpDeviceId": null,
+      "pagpGroupIfIndex": null,
+      "ifInUcastPkts": 681,
+      "ifInUcastPkts_prev": 681,
+      "ifInUcastPkts_delta": 0,
+      "ifInUcastPkts_rate": 0,
+      "ifOutUcastPkts": 507,
+      "ifOutUcastPkts_prev": 504,
+      "ifOutUcastPkts_delta": 3,
+      "ifOutUcastPkts_rate": 0,
+      "ifInErrors": 0,
+      "ifInErrors_prev": 0,
+      "ifInErrors_delta": 0,
+      "ifInErrors_rate": 0,
+      "ifOutErrors": 0,
+      "ifOutErrors_prev": 0,
+      "ifOutErrors_delta": 0,
+      "ifOutErrors_rate": 0,
+      "ifInOctets": 44762,
+      "ifInOctets_prev": 44762,
+      "ifInOctets_delta": 0,
+      "ifInOctets_rate": 0,
+      "ifOutOctets": 49564,
+      "ifOutOctets_prev": 49160,
+      "ifOutOctets_delta": 404,
+      "ifOutOctets_rate": 3,
+      "poll_time": 1755599224,
+      "poll_prev": 1755599106,
+      "poll_period": 118
+    }
+  ]
 }
------------------------------
+2025-08-19 10:27:04 - -----------------------------
+
+2025-08-19 10:27:04 - Dialer 1 ifOperStatus = up
+2025-08-19 10:27:04 - ✅ 192.168.150.132 recovered (Dialer 1 is UP). Removing from state.
+2025-08-19 10:27:04 - 🎉 All devices recovered; recovery loop will pause until next alert.
+2025-08-19 10:27:04 - 🛌 State file empty — pausing recovery loop until next alert.

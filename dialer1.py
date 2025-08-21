@@ -228,6 +228,7 @@ class RecoveryManager:
                 else:
                     log(f"❌ {hostname} still not healthy; forcing UNSUPERVISED_IP again.")
                     force_device_down(device_id)
+                    ssh_poll_device(original_ip)
 
             except requests.HTTPError as e:
                 log(f"⚠️ HTTP error during recovery for {hostname}: {e}")

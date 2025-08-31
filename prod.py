@@ -1,29 +1,34 @@
-#!/usr/bin/env python3
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import requests
 import time
 import threading
 import os
-import subprocess
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
 # =======================
-# Config (use env vars)
+# Load .env
 # =======================
-LIBRENMS_URL    = os.getenv("LIBRENMS_URL", "http://127.0.0.1/api/v0")
-API_TOKEN       = os.getenv("LIBRENMS_API_TOKEN", "")
+load_dotenv()
+
+# =======================
+# Config (from .env)
+# =======================
+LIBRENMS_URL   = os.getenv("LIBRENMS_URL", "http://127.0.0.1/api/v0")
+API_TOKEN      = os.getenv("LIBRENMS_API_TOKEN", "")
 UNSUPERVISED_IP = os.getenv("UNSUPERVISED_IP", "127.0.0.50")
-STATE_FILE      = os.getenv("STATE_FILE", "device_state.json")
-
-TARGET_IFNAME   = os.getenv("TARGET_IFNAME", "port2")
-RECOVERY_INTERVAL_SEC = int(os.getenv("RECOVERY_INTERVAL_SEC", "1200"))  # 20 minutes default
+STATE_FILE     = os.getenv("STATE_FILE", "device_state.json")
+TARGET_IFNAME  = os.getenv("TARGET_IFNAME", "port2")
+RECOVERY_INTERVAL_SEC = int(os.getenv("RECOVERY_INTERVAL_SEC", "1200"))  # default 20min
+HTTP_PORT      = int(os.getenv("HTTP_PORT", "5000"))
 
 # =======================
 # Helpers
 # =======================
 def log(msg):
-    print(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {msg}", flush=True)
+    line = f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {msg}"
+    print(line, flush=True)
 
 def load_state():
     if os.path.exists(STATE_FILE):
@@ -72,41 +77,20 @@ def libre_api(method, endpoint, data=None, params=None):
             return None
     return None
 
-def poll_device_locally(host_or_id):
-    """
-    Run the LibreNMS artisan poller locally instead of SSH/Docker.
-    """
-    cmd = ["php", "/opt/librenms/artisan", "device:poll", str(host_or_id)]
+def find_port_id_for_ifname(device_id_or_host, ifname=TARGET_IFNAME):
     try:
-        log(f"Running local poll command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        log(f"Poll STDOUT:\n{result.stdout}")
-        if result.stderr.strip():
-            log(f"Poll STDERR:\n{result.stderr}")
-    except subprocess.CalledProcessError as e:
-        log(f"⚠️ Local poll failed (exit {e.returncode}): {e.stderr}")
-
-def find_port_id(device_id_or_host, target_ifname=TARGET_IFNAME):
-    """
-    Query LibreNMS using the ports search API:
-    GET /api/v0/ports/search/ifName/:search
-    Returns the first matching port_id for the given device.
-    """
-    try:
-        resp = libre_api("GET", f"/ports/search/ifName/{target_ifname}",
+        resp = libre_api("GET", f"/ports/search/ifName/{ifname}",
                          params={"columns": "port_id,device_id,ifName"})
         ports = resp.get("ports", []) if resp else []
+
         for p in ports:
             if str(p.get("device_id")) == str(device_id_or_host):
                 return str(p.get("port_id"))
     except Exception as e:
-        log(f"⚠️ Failed to lookup port_id for {device_id_or_host}: {e}")
+        log(f"⚠️ Failed to lookup port_id via search API for {device_id_or_host}: {e}")
     return None
 
 def get_port_oper_status(port_id):
-    """
-    GET /api/v0/ports/:portid → read ifOperStatus
-    """
     resp = libre_api("GET", f"/ports/{port_id}")
     if not resp:
         return None
@@ -193,27 +177,25 @@ class RecoveryManager:
 
             try:
                 restore_device_ip(device_id, original_ip)
-                poll_device_locally(device_id)
 
                 if not port_id:
                     log("ℹ️ No port_id in state; attempting to re-detect.")
-                    port_id = find_port_id(device_id)
+                    port_id = find_port_id_for_ifname(device_id)
                     if port_id:
                         state[device_id]["port_id"] = port_id
                         save_state(state)
 
                 status = get_port_oper_status(port_id) if port_id else None
-                log(f"Port {TARGET_IFNAME} ifOperStatus = {status}")
+                log(f"{TARGET_IFNAME} ifOperStatus = {status}")
 
                 if status and status.lower() == "up":
-                    log(f"✅ {hostname} recovered (port {TARGET_IFNAME} is UP). Removing from state.")
+                    log(f"✅ {hostname} recovered ({TARGET_IFNAME} is UP). Removing from state.")
                     del state[device_id]
                     save_state(state)
                     changed = True
                 else:
                     log(f"❌ {hostname} still not healthy; forcing UNSUPERVISED_IP again.")
                     force_device_down(device_id)
-                    poll_device_locally(original_ip)
 
             except requests.HTTPError as e:
                 log(f"⚠️ HTTP error during recovery for {hostname}: {e}")
@@ -266,8 +248,8 @@ class AlertHandler(BaseHTTPRequestHandler):
             self.wfile.write(b"Missing required fields")
             return
 
-        port_id = find_port_id(device_id, TARGET_IFNAME)
-        log(f"Detected port_id for {TARGET_IFNAME}: {port_id}")
+        port_id = find_port_id_for_ifname(device_id, TARGET_IFNAME)
+        log(f"Detected {TARGET_IFNAME} port_id: {port_id}")
 
         state = load_state()
         state[str(device_id)] = {
@@ -293,6 +275,6 @@ class AlertHandler(BaseHTTPRequestHandler):
 # Main
 # =======================
 if __name__ == "__main__":
-    log("HTTP server listening on 0.0.0.0:5000 for LibreNMS alerts...")
-    server = HTTPServer(("0.0.0.0", 5000), AlertHandler)
+    log(f"HTTP server listening on 0.0.0.0:{HTTP_PORT} for LibreNMS alerts...")
+    server = HTTPServer(("0.0.0.0", HTTP_PORT), AlertHandler)
     server.serve_forever()

@@ -1,15 +1,20 @@
+[Unit]
+Description=LibreNMS Alert Handler
+After=network.target
+
 [Service]
 Type=simple
-User=librenms
-Group=librenms
 WorkingDirectory=/opt/librenms-alert-handler
-ExecStart=/usr/bin/env python3 /opt/librenms-alert-handler/alert_handler.py
-Restart=always
-RestartSec=5
-
-# Load environment variables
+ExecStart=/usr/bin/python3 /opt/librenms-alert-handler/alert_handler.py
 EnvironmentFile=/opt/librenms-alert-handler/.env
 
 # Logging
 StandardOutput=append:/var/log/librenms-alert-handler.log
 StandardError=append:/var/log/librenms-alert-handler.log
+
+# Restart policy
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

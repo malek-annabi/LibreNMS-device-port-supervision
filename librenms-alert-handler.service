@@ -1,0 +1,15 @@
+[Service]
+Type=simple
+User=librenms
+Group=librenms
+WorkingDirectory=/opt/librenms-alert-handler
+ExecStart=/usr/bin/env python3 /opt/librenms-alert-handler/alert_handler.py
+Restart=always
+RestartSec=5
+
+# Load environment variables
+EnvironmentFile=/opt/librenms-alert-handler/.env
+
+# Logging
+StandardOutput=append:/var/log/librenms-alert-handler.log
+StandardError=append:/var/log/librenms-alert-handler.log

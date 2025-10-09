@@ -276,7 +276,7 @@ public class LibreNMSAlertHandler {
         return null;
     }
 
-    // Poll device using artisan, after restore (NOT after force down!)
+    // Poll device using artisan, after restore or force down
     private static void pollDevice(String deviceIdOrHost) {
         try {
             ProcessBuilder pb = new ProcessBuilder(
@@ -300,13 +300,12 @@ public class LibreNMSAlertHandler {
         }
     }
 
-    // No polling after forcing device down
     private static void forceDeviceDown(String deviceIdOrHost) {
         try {
             String patchData = "{\"field\":\"overwrite_ip\",\"data\":\"" + escapeJson(UNSUPERVISED_IP) + "\"}";
             libreApi("PATCH", "/devices/" + deviceIdOrHost, patchData, null);
             libreApi("GET", "/devices/" + deviceIdOrHost + "/discover", null, null);
-            // NO pollDevice(deviceIdOrHost) here!
+            pollDevice(deviceIdOrHost);
         } catch (Exception e) {
             log("⚠️ Failed to force device down: " + e);
         }
@@ -471,7 +470,7 @@ public class LibreNMSAlertHandler {
                             changed = true;
                         } else {
                             log("❌ " + hostname + " still not healthy; forcing UNSUPERVISED_IP again.");
-                            forceDeviceDown(deviceId); // Will NOT poll after setting down
+                            forceDeviceDown(deviceId); // Will also poll after setting down
                         }
                     } catch (Exception e) {
                         log("⚠️ Error during recovery for " + hostname + ": " + e);
